@@ -33,6 +33,7 @@ module LanguagePack
         install_java
         setup_profiled
       end
+      puts "java Compile phase completed"
     end
 
     def install_java

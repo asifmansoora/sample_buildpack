@@ -3,5 +3,5 @@
 cat << EOF
 addons: []
 default_process_types: {
-}
+web:"./.profile.d/java.sh run"}
 EOF
