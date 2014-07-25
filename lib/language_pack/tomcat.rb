@@ -1,6 +1,6 @@
 require "yaml"
 require "fileutils"
-require "language_pack/package_fetcher"
+#require "language_pack/package_fetcher"
 require "language_pack/format_duration"
 require 'fileutils'
 require "language_pack/java"
@@ -36,19 +36,24 @@ module LanguagePack
        
        #puts tomcat_package
        FileUtils.mkdir_p tomcat_home
-       tomcat_tarball = "#{tomcat_home}/apache-tomcat-7.0.54.tar.gz"
        tomcat_package = tomcat_config["repository_root"]
        filename = tomcat_config["filename"]
+
+       #tomcat_tarball = "#{tomcat_home}/apache-tomcat-7.0.54.tar.gz"
+
+       #download_tomcat tomcat_tarball
+        
        puts "------->Downloading #{filename}  from #{tomcat_package}"
        download_start_time = Time.now
-       fetched_package=system("curl #{tomcat_package}/#{filename} -s -o #{filename}")
+       system("curl #{tomcat_package}/#{filename} -s -o #{filename}")
+       #fetched_package=system("curl #{tomcat_package}/#{filename} -s -o #{filename}")
        puts "fetched to a location"
        #FileUtils.mv fetched_package, tomcat_tarball
        puts "(#{(Time.now - download_start_time).duration})"
        puts "------->Unpacking tomcat"
        download_start_time = Time.now
        #unzip geronimo package in geronimo_home
-       tar_output = run_with_err_output "tar pxzf #{fetched_package} -C #{tomcat_home}"
+       tar_output = run_with_err_output "tar pxzf #{filename} -C #{tomcat_home}"
        #move contents of geronimo zip to geronimo_home
        #run_with_err_output("mv #{tomcat_home}/* #{tomcat_home} && " + "rm -rf #{geronimo_home}/geronimo-tomcat*")
        # delete downloaded zip as we have extracted it now. So the size of droplet will get reduced 
@@ -80,5 +85,30 @@ module LanguagePack
     def run_with_err_output(command)
       %x{ #{command} 2>&1 }
     end
+
+    def download_tomcat(tomcat_tarball)
+      puts "----->Downloading tomcat..."
+      download_start_time = Time.now
+      fetched_package = fetch_tomcat_package(java_version)
+      FileUtils.mv fetched_package, jdk_tarball
+       puts "(#{(Time.now - download_start_time).duration})"
+    end
+
+    def fetch_jdk_package(version)
+      jdk_package = packages_config["openjdk"].find { |p| p["version"] == version }
+
+      raise "Unsupported Java version: #{version}" unless jdk_package
+
+      #fetch_from_buildpack_cache(jdk_package["jre"]) ||
+      #fetch_from_blobstore(jdk_package["jre"]) ||
+      fetch_from_curl(jdk_package["full"], VENDOR_URL)
+    end
+
+    def fetch_from_curl(filename, url)
+      puts "Downloading #{filename} from #{url} ..."
+      system("curl #{url}/#{filename} -s -o #{filename}")
+      File.exist?(filename) ? filename : nil
+    end
+
    end
 end
