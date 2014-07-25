@@ -43,16 +43,16 @@ module LanguagePack
        download_start_time = Time.now
        fetched_package=system("curl #{tomcat_package}/#{filename} -s -o #{filename}")
        puts "fetched to a location"
-       FileUtils.mv fetched_package, tomcat_tarball
+       #FileUtils.mv fetched_package, tomcat_tarball
        puts "(#{(Time.now - download_start_time).duration})"
        puts "------->Unpacking tomcat"
        download_start_time = Time.now
        #unzip geronimo package in geronimo_home
-       tar_output = run_with_err_output "tar pxzf #{tomcat_tarball} -C #{tomcat_home}"
+       tar_output = run_with_err_output "tar pxzf #{fetched_package} -C #{tomcat_home}"
        #move contents of geronimo zip to geronimo_home
        #run_with_err_output("mv #{tomcat_home}/* #{tomcat_home} && " + "rm -rf #{geronimo_home}/geronimo-tomcat*")
        # delete downloaded zip as we have extracted it now. So the size of droplet will get reduced 
-       FileUtils.rm_rf tomcat_tarball
+       #FileUtils.rm_rf tomcat_tarball
        puts "(#{(Time.now - download_start_time).duration})"
 
         #check for geronimo.sh if available means you have downloaded geronimo successfully
